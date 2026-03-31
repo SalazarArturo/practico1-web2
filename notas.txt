@@ -1,0 +1,55 @@
+import { Usuarios } from "./../models/index.js";
+
+async function findUserByEmail(email){
+    //mantener el repository lo mas natural posible ... no maneja errores ni nada eso se lo delega al service
+    const result = await Usuarios.findOne({where: {email}}); //que es exactamente result ? ... 
+    return result;
+   
+}
+
+async function createUser(userData){
+    
+    const userCreated = await Usuarios.create(userData);
+    return userCreated;
+}
+
+export {
+    findUserByEmail,
+    createUser
+}
+
+que es exactamente result en nuestra funcion findUserByEmail? es una instancia de uno de nuestros modelos (tablas) hechos en sequelize 
+es algo asi: 
+Usuarios { // es el modelo que definimos
+  dataValues: { //los datos resultados de la consulta
+    id: 1,
+    nombre: 'Arturo',
+    email: 'arturo@mail.com',
+    contrasena: 'hash...',
+    rol: 'user'
+  },
+  _previousDataValues: {...},
+  isNewRecord: false,
+  ...
+}
+ojo que esto es un objeto de Usuarios modelo definido en nuestro ORM sequelize
+aunque podemos acceder directamente a las propiedades de la instancia sin acceder al dataValues debido a getters internos del modelo gracias a sequelize
+//sesiones nada que ver en el en el service eso se ve en el controller junto con todo lo que sea http, sesiones, etc
+
+la property session de nuestro objeto request en express es un objeto que nos permite guardar informacion entre multiples request 
+tal cual como lo veniamos haciendo antes con jwt para el token y guardar este token en una cookie para que el navegador lo almacene
+
+la estructura de este objeto session es algo asi: 
+req.session = {
+    cookie: {
+        path: '/',
+        httpOnly: true,
+        maxAge: 3600000
+    },
+    user: {
+        id: 1,
+        email: 'arturo@mail.com'
+    }
+}
+
+primero necesitamos instalar la dependencia express-sesion para "activar" esta property del objeto req 

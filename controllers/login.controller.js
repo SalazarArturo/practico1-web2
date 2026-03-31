@@ -1,12 +1,14 @@
+/*
 const bcrypt = require('bcryptjs');
 const db = require('../models');
 const Usuarios = db.Usuarios;
+*/
 
-const getLogin = (req, res) => {
-    res.render('auth/login');
-};
-
-const postLogin = async (req, res) => {
+/*
+    Gabo si ves esto te comento que todo este script va a volar junto con el register.controller 
+    siguiendo tu patron condensaremos todo lo que sea login y register en un solo script en este caso el auth.controller.js
+*/
+/*const postLogin = async (req, res) => {
     const { email, contrasena } = req.body;
     try {
         const usuario = await Usuarios.findOne({ where: { email } });
@@ -42,5 +44,5 @@ const postLogin = async (req, res) => {
         res.redirect('/auth/login');
     }
 };
+*/
 
-module.exports = { getLogin, postLogin };

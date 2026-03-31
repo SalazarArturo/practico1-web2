@@ -2,6 +2,10 @@ const bcrypt = require('bcryptjs');
 const db = require('../models');
 const Usuarios = db.Usuarios;
 
+/*
+    Gabo si ves esto te comento que todo este script va a volar junto con el login.controller 
+    siguiendo tu patron condensaremos todo lo que sea login y register en un solo script en este caso el auth.controller.js
+*/
 const getRegister = (req, res) => {
     res.render('auth/register');
 };

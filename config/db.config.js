@@ -1,22 +1,17 @@
-const { Sequelize } = require('sequelize');
+import { Sequelize } from 'sequelize';
 
-// Config SQLite
-const sequelize = new Sequelize({
+//configuramos sqlite
+export const sequelize = new Sequelize({
     dialect: 'sqlite',
     storage: 'database.sqlite',
     define: {
-        underscored: true  // ← esto hace que todas las FK sean snake_case
+        underscored: true //  esto hace que todas las FK sean snake_case
     }
 });
 
-sequelize.authenticate()
-    .then(() => {
-        console.log('Connection has been established successfully.');
-    })
-    .catch((error) => {
-        console.error('Unable to connect to the database:', error);
-    });
-
-module.exports = {
-    sequelize, Sequelize
+try {
+    await sequelize.authenticate();
+    console.log('Conexion exitosa');
+} catch (error) {
+    console.error('Error de conexion', error);
 }

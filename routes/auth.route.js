@@ -1,11 +1,19 @@
+/*
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/auth.controller');
+*/
+import { Router } from "express";
+import * as authC from './../controllers/auth.controller.js';
 
-router.get('/login',    authController.getLogin);
-router.post('/login',   authController.postLogin);
-router.get('/register', authController.getRegister);
-router.post('/register', authController.postRegister);
-router.get('/logout',   authController.logout);
+const authRouter = Router();
 
-module.exports = router;
+
+authRouter.get('/', authC.getLogin);
+//authRouter.post('/login',   authController.postLogin);
+authRouter.get('/register', authC.getRegister);
+//authRouter.post('/register', authController.postRegister);
+//authRouter.get('/logout',   authController.logout);
+
+
+export default authRouter;

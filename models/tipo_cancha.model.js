@@ -1,4 +1,4 @@
-const { DataTypes } = require("sequelize");
+/*const { DataTypes } = require("sequelize");
 
 module.exports = (sequelize) => {
     const TipoCancha = sequelize.define(
@@ -9,6 +9,21 @@ module.exports = (sequelize) => {
                 allowNull: false,
             }
             
+        },
+    );
+    return TipoCancha;
+};*/
+
+import { DataTypes } from "sequelize";
+
+export default (sequelize) =>{
+    const TipoCancha = sequelize.define(
+        'TipoCancha',
+        {
+            nombre: {
+                type: DataTypes.STRING,
+                allowNull: false,
+            }   
         },
     );
     return TipoCancha;
