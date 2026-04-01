@@ -53,3 +53,30 @@ req.session = {
 }
 
 primero necesitamos instalar la dependencia express-sesion para "activar" esta property del objeto req 
+luego importamos la dependencia en nuestro index.js y la usamos como middleware global 
+
+app.use(session({
+    secret: process.env.SESSION_SECRET_WORD, //para firmar la cookie 
+    resave: false, // si no hubo cambios en la sesion no sobreescribimos ni guardamos 
+    saveUninitialized: false,
+    cookie: {
+        secure: false,
+        maxAge: 1000 * 60 * 60
+    }
+}));
+
+cuando llega un request la sesion es guardada en memoria y con el resave decimos que si no hubo cambios en la sesion en el proximo
+request pa que vamos a guardar si es lo mismo ... ahorro de memoria paa 
+
+y el saveUninitialized es para crear una sesion automaticamente aunque nosotros no lo hayamos hecho explicitamente 
+por eso le damos valor false, si no lo especificamos pues es porque no es necesario sesion, lo mismo .. gestion de memoria 
+
+entonces en este flujo de login tomamos el primer request del cliente y ahi creamos la sesion 
+esto gatillara que guardamos la info de la sesion en memoria y se aliste una cookie en nuestra response para el cliente
+el cliente en su proxima request devolvera esa cookie y ahi dentro tenemos la info de la sesion para corroborar datos y seguir con las operaciones
+
+pensamientos falopa:
+  //aqui deberia renderizar o redirigir ? ... 
+        // lo correcto seria redirigir, como es algo que viene del response ya esta metiendo la cookie de la sesion que creamos la sesion esta guardada en memoria y se creo la cookie para ser enviada en nuestro response 
+        //entonces al provocar un get por el lado del cliente gracias el redirect .. no aseguramos de que vuelva esa cookie a nosotros para ser validada
+        //y en ese get ya esta viajando la cookie que genero nuestra session  en nuestro response 

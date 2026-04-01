@@ -39,7 +39,7 @@ export default (sequelize) =>{
                 type: DataTypes.STRING,
                 allowNull: false,
             },
-            contasena:{
+            contrasena:{
                 type: DataTypes.STRING,
                 allowNull: false,
             },

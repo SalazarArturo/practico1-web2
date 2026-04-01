@@ -8,7 +8,7 @@ async function findUserByEmail(email){
 }
 
 async function createUser(userData){
-    
+
     const userCreated = await Usuarios.create(userData);
     return userCreated;
 }

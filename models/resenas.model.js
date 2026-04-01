@@ -22,8 +22,8 @@ module.exports = (sequelize) => {
 import { DataTypes } from "sequelize";
 
 export default (sequelize) =>{
-    const Resehas = sequelize.define(
-        'Resehas',
+    const Resenas = sequelize.define(
+        'Resenas',
         {
             calificacion:{
                 type: DataTypes.INTEGER,
@@ -35,5 +35,5 @@ export default (sequelize) =>{
             }
         },
     );
-    return Resehas;
+    return Resenas;
 };
