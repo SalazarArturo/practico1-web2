@@ -60,7 +60,7 @@ async function processNewUserCredentialsService(credentials){
             success: true,
             newUserData:{
                 id: result.id,
-                username: result.nombre,
+                nombre: result.nombre,
                 email: result.email,
                 rol: result.rol
             }

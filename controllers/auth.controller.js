@@ -76,10 +76,19 @@ async function postNewUser(req, res){
         console.error(`Error capturado en el controlador: ${error}`);
     }
 }
-
+function logout(req, res){
+    req.session.destroy((error) =>{
+        if(error){
+            return res.redirect('/user/home?error=logout');
+        }
+        res.clearCookie('connect.sid');
+        return res.redirect('/');
+    });
+}
 export{
     getLogin,
     getRegister,
     postLogin,
-    postNewUser
+    postNewUser,
+    logout
 }

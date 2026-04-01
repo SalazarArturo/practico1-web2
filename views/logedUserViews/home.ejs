@@ -1,5 +1,7 @@
-<%- include('../components/header.ejs') %>
-    <p>
-        pagina protegida (si llegamos correctamente)
-    </p>
-<%- include('../components/footer.ejs') %>
+<%- include('../components/home/header.ejs') %>
+    <% if(locals.logoutError){ %>
+        <div class="alert alert-danger m-3">
+            <%= locals.logoutError %>
+        </div>
+    <% } %>
+<%- include('../components/home/footer.ejs') %>
