@@ -11,8 +11,8 @@ import {
 } from "../services/user.service.js";
 
 // controllers/admin.controller.js
-import { crearHorariosRangoService, getHorariosByCanchaService, deleteHorarioService } from '../services/horario.service.js';
-import { getAllCanchasService, getCanchaByIdService } from '../services/cancha.service.js';
+/*import { crearHorariosRangoService, getHorariosByCanchaService, deleteHorarioService } from '../services/horario.service.js';
+import { getAllCanchasService, getCanchaByIdService } from '../services/cancha.service.js';*/
 
 
 
@@ -115,10 +115,11 @@ async function postCanchaEditChanges(req, res){
     try {
         const result = await postCanchaDataChangesService(parseInt(canchaId), {nombre, precio_por_hora, estado});
         if(!result.success){
-            return res.render('logedUserViews/adminViews/canchas-form', {})
+            return res.render('logedUserViews/adminViews/canchas-form', {error: result.error});
         }
+        return res.redirect('/user/admin/canchas');
     } catch (error) {
-        
+        console.log(`Error capturado en el controller ${error}`);
     }
 
 }

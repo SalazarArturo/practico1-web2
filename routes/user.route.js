@@ -36,9 +36,9 @@ userRoute.post('/admin/modelos/:modeloId', isAuthenticated, isAdmin, postModelCh
 userRoute.post('/admin/modelos/:modeloId/delete', isAuthenticated, isAdmin, deleteModel);
 
 // Horarios
-adminRoute.get('/canchas/:id/horarios', isAuthenticated, isAdmin, getHorariosCancha);
+/*adminRoute.get('/canchas/:id/horarios', isAuthenticated, isAdmin, getHorariosCancha);
 adminRoute.post('/canchas/:id/horarios', isAuthenticated, isAdmin, createHorariosRango);
-adminRoute.post('/horarios/:id/delete',  isAuthenticated, isAdmin, deleteHorario);
+adminRoute.post('/horarios/:id/delete',  isAuthenticated, isAdmin, deleteHorario);*/
 
 
 export default userRoute

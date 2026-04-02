@@ -5,22 +5,22 @@
 
         <h2>Modelos de Cancha</h2>
 
-        <!-- error -->
+        
         <% if(error){ %>
             <p class="text-danger mt-2"><%= error %></p>
         <% } %>
 
-        <!-- sin modelos -->
+        
         <% if(!error && modelos.length === 0){ %>
             <p class="text-muted mt-2">No hay modelos de cancha registrados todavía</p>
         <% } %>
 
-        <!-- botón crear -->
+        
         <a href="/user/admin/modelos/new" class="btn btn-primary mb-3">
             Crear nuevo modelo
         </a>
 
-        <!-- tabla -->
+        
         <% if(!error && modelos.length > 0){ %>
 
             <table class="table table-striped">
