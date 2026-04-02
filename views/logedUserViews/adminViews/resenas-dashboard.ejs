@@ -1,0 +1,60 @@
+<%- include('../../components/home/header.ejs') %>
+
+<div class="container mt-4">
+    <h2 class="mb-4">Reseñas</h2>
+
+    <% if (locals.error) { %>
+        <div class="alert alert-danger"><%= error %></div>
+    <% } %>
+
+    <% if (!resenas || resenas.length === 0) { %>
+        <div class="alert alert-info">No hay reseñas registradas.</div>
+    <% } else { %>
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Cliente</th>
+                        <th>Cancha</th>
+                        <th>Calificación</th>
+                        <th>Comentario</th>
+                        <th>Fecha</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% resenas.forEach((resena, i) => { %>
+                        <tr>
+                            <td><%= i + 1 %></td>
+                            <td>
+                                <%= resena.usuario?.nombre || '-' %><br>
+                                <small class="text-muted"><%= resena.usuario?.email || '' %></small>
+                            </td>
+                            <td><%= resena.cancha?.nombre || '-' %></td>
+                            <td>
+                                <% for(let s = 0; s < resena.calificacion; s++) { %>⭐<% } %>
+                                (<%= resena.calificacion %>/5)
+                            </td>
+                            <td>
+                                <% if (resena.comentario) { %>
+                                    <%= resena.comentario %>
+                                <% } else { %>
+                                    <em class="text-muted">Sin comentario</em>
+                                <% } %>
+                            </td>
+                            <td>
+                                <% if (resena.createdAt) { %>
+                                    <%= new Date(resena.createdAt).toLocaleDateString('es-AR') %>
+                                <% } else { %>
+                                    -
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    <% } %>
+</div>
+
+<%- include('../../components/home/footer.ejs') %>

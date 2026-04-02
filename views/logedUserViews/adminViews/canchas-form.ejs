@@ -8,7 +8,7 @@
         <p class="text-danger"><%= error %></p>
     <% } %>
 
-    <form action="<%= locals.isEdit ? `/user/admin/canchas/${locals.cancha.id}` : "/user/admin/canchas" %>" method="POST">
+    <form action="<%= locals.isEdit ? `/user/admin/canchas/${locals.cancha.id}/edit` : "/user/admin/canchas" %>" method="POST">
         
         <div class="mb-3">
             <label class="form-label">Nombre</label>

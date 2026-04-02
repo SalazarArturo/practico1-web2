@@ -1,0 +1,42 @@
+<%- include('../components/home/header.ejs') %>
+
+<div class="container mt-4">
+    <h2 class="mb-4">Canchas disponibles</h2>
+
+    <% if (locals.error) { %>
+        <div class="alert alert-info"><%= error %></div>
+    <% } %>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        <% if (canchas && canchas.length > 0) { %>
+            <% canchas.forEach(cancha => { %>
+                <% if (cancha.estado === 'activa') { %>
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title"><%= cancha.nombre %></h5>
+                            <p class="card-text">
+                                <span class="badge bg-secondary mb-2">
+                                    <%= cancha.tipoCancha?.nombre || 'Sin tipo' %>
+                                </span><br>
+                                <strong>Precio por hora:</strong> $<%= cancha.precio_por_hora %>
+                            </p>
+                        </div>
+                        <div class="card-footer">
+                            <a href="/cliente/canchas/<%= cancha.id %>/reservar" class="btn btn-primary w-100">
+                                Ver disponibilidad y reseñas
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <% } %>
+            <% }) %>
+        <% } else if (!error) { %>
+            <div class="col-12">
+                <div class="alert alert-info">No hay canchas disponibles por el momento.</div>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<%- include('../components/home/footer.ejs') %>

@@ -1,26 +1,25 @@
-
-
 import { DataTypes } from "sequelize";
 
-export default (sequelize) =>{
+export default (sequelize) => {
     const Horarios = sequelize.define(
         'Horarios',
         {
-            fecha:{
-                type: DataTypes.DATEONLY,
+            // dias_semana: array JSON de días habilitados
+            // ej: ["lunes","martes","miercoles","jueves","viernes"]
+            dias_semana: {
+                type: DataTypes.JSON,
                 allowNull: false,
+                defaultValue: ["lunes", "martes", "miercoles", "jueves", "viernes"]
             },
-            hora_inicio:{
+            hora_apertura: {
                 type: DataTypes.TIME,
                 allowNull: false,
+                defaultValue: '07:00:00'
             },
-            hora_fin:{
+            hora_cierre: {
                 type: DataTypes.TIME,
                 allowNull: false,
-            },
-            disponible:{
-                type: DataTypes.BOOLEAN,
-                allowNull: false,
+                defaultValue: '23:00:00'
             }
         },
     );

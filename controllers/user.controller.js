@@ -7,34 +7,32 @@ import {
     deleteModelService,
     postNewCanchaService,
     editCanchaService,
-    postCanchaDataChangesService
-} from "../services/user.service.js";
+    postCanchaDataChangesService,
+    deleteCanchaService
+} from '../services/user.service.js';
 
-// controllers/admin.controller.js
-/*import { crearHorariosRangoService, getHorariosByCanchaService, deleteHorarioService } from '../services/horario.service.js';
-import { getAllCanchasService, getCanchaByIdService } from '../services/cancha.service.js';*/
+import { guardarDisponibilidadService, getDisponibilidadService, eliminarDisponibilidadService } from '../services/horario.service.js';
+import { getCanchaByIdService } from '../services/cancha.service.js';
+import { getAllReservasService, cambiarEstadoReservaService } from '../services/reserva.service.js';
+import { getAllResenasService } from '../services/resena.service.js';
 
-
-
-
-function serveHome(req, res){
-
+function serveHome(req, res) {
     let logError = req.query.error;
-
-    if(logError == 'logout'){
+    if (logError == 'logout') {
         logError = 'No se pudo cerrar la sesion, intente nuevamente';
     }
-    if(logError == 'unauthorized'){
-        logError = 'Acceso denegado'
+    if (logError == 'unauthorized') {
+        logError = 'Acceso denegado';
     }
-    return res.render('logedUserViews/home', {logError});
+    return res.render('logedUserViews/home', { logError });
 }
 
+// ─── CANCHAS ────────────────────────────────────────────────────────────────
 
-async function getCanchas(req, res){
+async function getCanchas(req, res) {
     try {
         const result = await getAllCanchasService();
-        if(!result.success){
+        if (!result.success) {
             return res.render('logedUserViews/adminViews/canchas-dashboard', {
                 canchas: [],
                 error: result.error
@@ -45,60 +43,64 @@ async function getCanchas(req, res){
             error: null
         });
     } catch (error) {
-        return res.render('logedUserViews/adminViews/canchas-dashboard', { 
+        return res.render('logedUserViews/adminViews/canchas-dashboard', {
             canchas: [],
             error: 'Error al cargar las canchas'
         });
     }
 }
 
-async function serveNewCanchaForm(req, res){
+async function serveNewCanchaForm(req, res) {
     try {
         const result = await getTiposService();
-        if(!result.success){
-            return res.render('logedUserViews/adminViews/canchas-form', {error: 'No tiene modelos de canchas creados, debe tener alguno para crear canchas'});
-        } 
-        return res.render('logedUserViews/adminViews/canchas-form',{tipos: result.modelos});     
+        if (!result.success) {
+            return res.render('logedUserViews/adminViews/canchas-form', {
+                tipos: [],
+                error: 'No tiene modelos de canchas creados, debe tener alguno para crear canchas'
+            });
+        }
+        return res.render('logedUserViews/adminViews/canchas-form', { tipos: result.modelos, error: null });
     } catch (error) {
         console.error(`Error capturado en el controller: ${error}`);
     }
-   
 }
 
-async function postNewCancha(req, res){
-    const {nombre, precio_por_hora, estado} = req.body;
+async function postNewCancha(req, res) {
+    const { nombre, precio_por_hora, estado, tipo_cancha_id } = req.body;
 
-    if(nombre.trim() == ''){
-        return res.render('logedUserViews/adminViews/canchas-form', {error: 'No puede dejar este campo vacio'});
-    }
-     if(precio_por_hora.trim() == ''){
-        return res.render('logedUserViews/adminViews/canchas-form', {error: 'No puede dejar este campo vacio'});
-    }
-     if(estado.trim() == ''){
-        return res.render('logedUserViews/adminViews/canchas-form', {error: 'No puede dejar este campo vacio'});
+    if (!nombre || nombre.trim() == '') {
+        const tiposResult = await getTiposService();
+        return res.render('logedUserViews/adminViews/canchas-form', {
+            tipos: tiposResult.modelos || [],
+            error: 'El nombre no puede estar vacío'
+        });
     }
     try {
-        const result = await postNewCanchaService({nombre, precio_por_hora, estado});
-        if(!result.success){
-            return res.render('logedUserViews/adminViews/canchas-form', {error: result.error});
+        const result = await postNewCanchaService({ nombre, precio_por_hora, estado, tipo_cancha_id });
+        if (!result.success) {
+            const tiposResult = await getTiposService();
+            return res.render('logedUserViews/adminViews/canchas-form', {
+                tipos: tiposResult.modelos || [],
+                error: result.error
+            });
         }
-        res.redirect('/user/admin/canchas');
+        return res.redirect('/user/admin/canchas');
     } catch (error) {
         console.error(`Error capturado en el controller: ${error}`);
     }
 }
 
-async function editCancha(req, res){
+async function editCancha(req, res) {
     const canchaId = req.params.canchaId;
     try {
         const result = await editCanchaService(parseInt(canchaId));
         const tiposResult = await getTiposService();
 
-        if(!result.success){
-            return res.render('logedUserViews/adminViews/canchas-dashboard', {error: result.error});
+        if (!result.success) {
+            return res.redirect('/user/admin/canchas');
         }
 
-        return res.render('logedUserViews/adminViews/canchas-form',{
+        return res.render('logedUserViews/adminViews/canchas-form', {
             cancha: result.cancha,
             tipos: tiposResult.modelos || [],
             error: null,
@@ -109,25 +111,45 @@ async function editCancha(req, res){
     }
 }
 
-async function postCanchaEditChanges(req, res){
+async function postCanchaEditChanges(req, res) {
     const canchaId = req.params.canchaId;
-    const {nombre, precio_por_hora, estado} = req.body;
+    const { nombre, precio_por_hora, estado, tipo_cancha_id } = req.body;
     try {
-        const result = await postCanchaDataChangesService(parseInt(canchaId), {nombre, precio_por_hora, estado});
-        if(!result.success){
-            return res.render('logedUserViews/adminViews/canchas-form', {error: result.error});
+        const result = await postCanchaDataChangesService(parseInt(canchaId), {
+            nombre, precio_por_hora, estado, tipo_cancha_id
+        });
+        if (!result.success) {
+            const tiposResult = await getTiposService();
+            return res.render('logedUserViews/adminViews/canchas-form', {
+                tipos: tiposResult.modelos || [],
+                error: result.error,
+                isEdit: true
+            });
         }
         return res.redirect('/user/admin/canchas');
     } catch (error) {
-        console.log(`Error capturado en el controller ${error}`);
+        console.error(`Error capturado en el controller: ${error}`);
     }
-
 }
-async function proccessCanchaTypes(req, res){
+
+async function deleteCancha(req, res) {
+    const canchaId = req.params.canchaId;
+    try {
+        await deleteCanchaService(parseInt(canchaId));
+        return res.redirect('/user/admin/canchas');
+    } catch (error) {
+        console.error(`Error capturado en el controller: ${error}`);
+        return res.redirect('/user/admin/canchas');
+    }
+}
+
+// ─── TIPOS / MODELOS ─────────────────────────────────────────────────────────
+
+async function proccessCanchaTypes(req, res) {
     try {
         const result = await getTiposService();
-        if(!result.success){
-            return res.render('logedUserViews/adminViews/modelos-dashboard',{
+        if (!result.success) {
+            return res.render('logedUserViews/adminViews/modelos-dashboard', {
                 modelos: [],
                 error: result.error
             });
@@ -144,84 +166,76 @@ async function proccessCanchaTypes(req, res){
     }
 }
 
-function serveModeloForm(req, res){
+function serveModeloForm(req, res) {
     const error = req.query.error;
-    return res.render('logedUserViews/adminViews/modelos-form', {editError: error});
+    return res.render('logedUserViews/adminViews/modelos-form', { editError: error });
 }
 
-async function postModelo(req, res){
-
-    const {nombre} = req.body;
-
-    if(nombre.trim() == ''){
-        return res.render('logedUserViews/adminViews/modelos-form', {error: 'No puede dejar este campo vacio'});
+async function postModelo(req, res) {
+    const { nombre } = req.body;
+    if (!nombre || nombre.trim() == '') {
+        return res.render('logedUserViews/adminViews/modelos-form', { error: 'No puede dejar este campo vacio' });
     }
     try {
-        const result = await proccesNewModelDataService({nombre});
-        if(!result.success){
-            return res.render('logedUserViews/adminViews/modelos-form', {error: result.error});
+        const result = await proccesNewModelDataService({ nombre });
+        if (!result.success) {
+            return res.render('logedUserViews/adminViews/modelos-form', { error: result.error });
         }
-        res.redirect('/user/admin/modelos');
-    } catch (error) {
-        console.error(`Error capturado en el controlador: ${error}`);
-    }
-
-}
-
-async function editModel(req, res){
-
-    const modeloId = req.params.modeloId;
-    try {
-        const result = await editModelService(parseInt(modeloId));
-        if(!result.success){
-            return res.render('/user/admin/modelos', {error: result.error});
-        }
-
-        return res.render('logedUserViews/adminViews/modelos-form',{
-            modelo: result.model,
-            error: null,
-            isEdit: true
-        });
-
-    } catch (error) {
-        console.error(`Error capturado en el controlador: ${error}`);
-    }
-}
-
-async function postModelChanges(req, res){
-
-    const modeloId = req.params.modeloId;
-    const {nombre} = req.body;
-
-    if(nombre.trim() == ''){
-        return res.render('logedUserViews/adminViews/modelos-form',{
-            error: 'No puede dejar este campo vacio',
-            modelo: {id: modeloId, nombre},
-            isEdit: true
-        });
-    }
-    try {
-        const result = await postModelChangesService(parseInt(modeloId), {nombre})
-        if(!result.success){
-            return res.render('logedUserViews/adminViews/modelos-form', {
-                error: result.error,
-                modelo: {id: modeloId, nombre},
-                isEdit: true
-            });
-        }
-        console.log(result.value);
         return res.redirect('/user/admin/modelos');
     } catch (error) {
         console.error(`Error capturado en el controlador: ${error}`);
     }
 }
 
-async function deleteModel(req, res){
+async function editModel(req, res) {
+    const modeloId = req.params.modeloId;
+    try {
+        const result = await editModelService(parseInt(modeloId));
+        if (!result.success) {
+            return res.redirect('/user/admin/modelos');
+        }
+        return res.render('logedUserViews/adminViews/modelos-form', {
+            modelo: result.model,
+            error: null,
+            isEdit: true
+        });
+    } catch (error) {
+        console.error(`Error capturado en el controlador: ${error}`);
+    }
+}
+
+async function postModelChanges(req, res) {
+    const modeloId = req.params.modeloId;
+    const { nombre } = req.body;
+
+    if (!nombre || nombre.trim() == '') {
+        return res.render('logedUserViews/adminViews/modelos-form', {
+            error: 'No puede dejar este campo vacio',
+            modelo: { id: modeloId, nombre },
+            isEdit: true
+        });
+    }
+    try {
+        const result = await postModelChangesService(parseInt(modeloId), { nombre });
+        if (!result.success) {
+            return res.render('logedUserViews/adminViews/modelos-form', {
+                error: result.error,
+                modelo: { id: modeloId, nombre },
+                isEdit: true
+            });
+        }
+        return res.redirect('/user/admin/modelos');
+    } catch (error) {
+        console.error(`Error capturado en el controlador: ${error}`);
+    }
+}
+
+async function deleteModel(req, res) {
     const modelId = req.params.modeloId;
     try {
         const result = await deleteModelService(parseInt(modelId));
-        if(!result.success){
-            return res.render('logedUserViews/adminViews/modelos-dashboard', {error: result.error});
+        if (!result.success) {
+            return res.redirect('/user/admin/modelos?error=' + result.error);
         }
         return res.redirect('/user/admin/modelos');
     } catch (error) {
@@ -229,77 +243,121 @@ async function deleteModel(req, res){
     }
 }
 
+// ─── HORARIOS ────────────────────────────────────────────────────────────────
 
-
-// GET /admin/canchas/:id/horarios
 async function getHorariosCancha(req, res) {
     try {
-        const { id } = req.params;
-        const [resultHorarios, resultCancha] = await Promise.all([
-            getHorariosByCanchaService(id),
-            getCanchaByIdService(id)
+        const { canchaId } = req.params;
+        const [resultDisponibilidad, resultCancha] = await Promise.all([
+            getDisponibilidadService(canchaId),
+            getCanchaByIdService(canchaId)
         ]);
 
-        return res.render('admin/horarios', {
-            horarios: resultHorarios.success ? resultHorarios.horarios : [],
+        return res.render('logedUserViews/adminViews/horarios-dashboard', {
+            horario: resultDisponibilidad.horario || null,
             cancha: resultCancha.success ? resultCancha.cancha : null,
-            error: resultHorarios.success ? null : resultHorarios.error
+            success: req.query.success || null,
+            error: req.query.error || null
         });
     } catch (error) {
-        return res.render('admin/horarios', {
-            horarios: [],
+        return res.render('logedUserViews/adminViews/horarios-dashboard', {
+            horario: null,
             cancha: null,
-            error: 'Error al cargar los horarios'
+            error: 'Error al cargar la disponibilidad',
+            success: null
         });
     }
 }
 
-// POST /admin/canchas/:id/horarios
 async function createHorariosRango(req, res) {
     try {
-        const { id } = req.params;
-        const { desde, hasta, hora_inicio, hora_fin } = req.body;
+        const { canchaId } = req.params;
+        let { dias_semana, hora_apertura, hora_cierre } = req.body;
 
-        const result = await crearHorariosRangoService(id, desde, hasta, hora_inicio, hora_fin);
+        // dias_semana puede llegar como string (1 día) o array (varios)
+        if (!dias_semana) dias_semana = [];
+        if (!Array.isArray(dias_semana)) dias_semana = [dias_semana];
+
+        const result = await guardarDisponibilidadService(canchaId, dias_semana, hora_apertura, hora_cierre);
 
         if (!result.success) {
-            return res.redirect(`/admin/canchas/${id}/horarios?error=${result.error}`);
+            return res.redirect(`/user/admin/canchas/${canchaId}/horarios?error=${encodeURIComponent(result.error)}`);
         }
-
-        return res.redirect(`/admin/canchas/${id}/horarios?success=${result.message}`);
+        return res.redirect(`/user/admin/canchas/${canchaId}/horarios?success=${encodeURIComponent(result.message)}`);
     } catch (error) {
-        return res.redirect(`/admin/canchas/${id}/horarios?error=Error al crear los horarios`);
+        const { canchaId } = req.params;
+        return res.redirect(`/user/admin/canchas/${canchaId}/horarios?error=${encodeURIComponent('Error al guardar disponibilidad')}`);
     }
 }
 
-// POST /admin/horarios/:id/delete
 async function deleteHorario(req, res) {
-    const { id } = req.params;
-    const { canchaId } = req.body; // para redirigir de vuelta a la cancha
+    const { canchaId } = req.body || {};
+    return res.redirect(`/user/admin/canchas/${canchaId || ''}/horarios`);
+}
+
+// ─── RESERVAS (admin) ────────────────────────────────────────────────────────
+
+async function getAllReservas(req, res) {
     try {
-        await deleteHorarioService(id);
-        return res.redirect(`/admin/canchas/${canchaId}/horarios`);
+        const result = await getAllReservasService();
+        return res.render('logedUserViews/adminViews/reservas-dashboard', {
+            reservas: result.reservas,
+            error: null
+        });
     } catch (error) {
-        return res.redirect(`/admin/canchas/${canchaId}/horarios?error=Error al eliminar`);
+        return res.render('logedUserViews/adminViews/reservas-dashboard', {
+            reservas: [],
+            error: 'Error al cargar las reservas'
+        });
     }
 }
 
+async function postCambiarEstadoReserva(req, res) {
+    const { reservaId } = req.params;
+    const { estado } = req.body;
+    try {
+        await cambiarEstadoReservaService(parseInt(reservaId), estado);
+        return res.redirect('/user/admin/reservas');
+    } catch (error) {
+        return res.redirect('/user/admin/reservas?error=Error al actualizar');
+    }
+}
 
+// ─── RESEÑAS (admin) ─────────────────────────────────────────────────────────
 
+async function getAllResenas(req, res) {
+    try {
+        const result = await getAllResenasService();
+        return res.render('logedUserViews/adminViews/resenas-dashboard', {
+            resenas: result.resenas,
+            error: null
+        });
+    } catch (error) {
+        return res.render('logedUserViews/adminViews/resenas-dashboard', {
+            resenas: [],
+            error: 'Error al cargar las reseñas'
+        });
+    }
+}
 
-
-export{
+export {
     serveHome,
     getCanchas,
     serveNewCanchaForm,
     postNewCancha,
+    editCancha,
+    postCanchaEditChanges,
+    deleteCancha,
     proccessCanchaTypes,
     serveModeloForm,
     postModelo,
     editModel,
     postModelChanges,
     deleteModel,
-    editCancha,
-    postCanchaEditChanges,
-    getHorariosCancha, createHorariosRango, deleteHorario
+    getHorariosCancha,
+    createHorariosRango,
+    deleteHorario,
+    getAllReservas,
+    postCambiarEstadoReserva,
+    getAllResenas
 }

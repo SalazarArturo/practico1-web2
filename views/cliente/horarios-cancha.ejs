@@ -1,0 +1,136 @@
+<%- include('../components/home/header.ejs') %>
+
+<div class="container mt-4">
+
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/cliente/canchas">Canchas</a></li>
+            <li class="breadcrumb-item active"><%= cancha.nombre %></li>
+        </ol>
+    </nav>
+
+    <% if (locals.success) { %>
+        <div class="alert alert-success alert-dismissible fade show">
+            <%= success %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <% } %>
+    <% if (locals.error) { %>
+        <div class="alert alert-danger alert-dismissible fade show">
+            <%= error %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <% } %>
+
+    <div class="row">
+        <!-- Info de la cancha -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="card-title"><%= cancha.nombre %></h4>
+                    <p class="mb-1">
+                        <span class="badge bg-secondary"><%= cancha.tipoCancha?.nombre || 'Sin tipo' %></span>
+                    </p>
+                    <p class="mt-2 mb-1"><strong>Precio por hora:</strong> $<%= cancha.precio_por_hora %></p>
+                    <p class="mb-0">
+                        <strong>Estado:</strong>
+                        <span class="badge <%= cancha.estado === 'activa' ? 'bg-success' : 'bg-danger' %>">
+                            <%= cancha.estado %>
+                        </span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Formulario de reseña -->
+            <div class="card shadow-sm mt-3">
+                <div class="card-body">
+                    <h5 class="card-title">Dejar una reseña</h5>
+                    <p class="text-muted small">Solo disponible si tuviste una reserva completada.</p>
+                    <form action="/cliente/resenas" method="POST">
+                        <input type="hidden" name="cancha_id" value="<%= cancha.id %>">
+                        <div class="mb-3">
+                            <label class="form-label">Calificación</label>
+                            <select name="calificacion" class="form-select" required>
+                                <option value="">Seleccioná...</option>
+                                <option value="5">⭐⭐⭐⭐⭐ Excelente</option>
+                                <option value="4">⭐⭐⭐⭐ Muy bueno</option>
+                                <option value="3">⭐⭐⭐ Bueno</option>
+                                <option value="2">⭐⭐ Regular</option>
+                                <option value="1">⭐ Malo</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Comentario (opcional)</label>
+                            <textarea name="comentario" class="form-control" rows="3" placeholder="Contá tu experiencia..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-outline-primary w-100">Enviar reseña</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Horarios disponibles -->
+        <div class="col-md-8">
+            <h4 class="mb-3">Horarios disponibles</h4>
+
+            <% if (!horarios || horarios.length === 0) { %>
+                <div class="alert alert-info">No hay horarios disponibles para esta cancha.</div>
+            <% } else { %>
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Hora inicio</th>
+                                <th>Hora fin</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% horarios.forEach(horario => { %>
+                                <tr>
+                                    <td><%= horario.fecha %></td>
+                                    <td><%= horario.hora_inicio %></td>
+                                    <td><%= horario.hora_fin %></td>
+                                    <td>
+                                        <form action="/cliente/reservas" method="POST">
+                                            <input type="hidden" name="horario_id" value="<%= horario.id %>">
+                                            <input type="hidden" name="cancha_id" value="<%= cancha.id %>">
+                                            <button type="submit" class="btn btn-success btn-sm">
+                                                Reservar
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } %>
+
+            <!-- Reseñas -->
+            <h4 class="mt-4 mb-3">Reseñas de esta cancha</h4>
+            <% if (!resenas || resenas.length === 0) { %>
+                <p class="text-muted">Todavía no hay reseñas para esta cancha.</p>
+            <% } else { %>
+                <% resenas.forEach(resena => { %>
+                    <div class="card mb-2 shadow-sm">
+                        <div class="card-body py-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <strong><%= resena.usuario?.nombre || 'Usuario' %></strong>
+                                <span>
+                                    <% for(let i = 0; i < resena.calificacion; i++) { %>⭐<% } %>
+                                </span>
+                            </div>
+                            <% if (resena.comentario) { %>
+                                <p class="mb-0 text-muted small mt-1"><%= resena.comentario %></p>
+                            <% } %>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<%- include('../components/home/footer.ejs') %>

@@ -1,0 +1,120 @@
+<%- include('../../components/home/header.ejs') %>
+
+<div class="container mt-4">
+
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/user/admin/canchas">Canchas</a></li>
+            <li class="breadcrumb-item active">Disponibilidad — <%= cancha?.nombre %></li>
+        </ol>
+    </nav>
+
+    <h2 class="mb-1">Disponibilidad de <%= cancha?.nombre %></h2>
+    <p class="text-muted mb-3">
+        Configurá qué días de la semana está habilitada la cancha y en qué horario.
+        Los clientes podrán reservar cualquier franja dentro de ese horario (mínimo 1 hora).
+    </p>
+
+    <% if (locals.success) { %>
+        <div class="alert alert-success alert-dismissible fade show">
+            <%= success %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <% } %>
+    <% if (locals.error) { %>
+        <div class="alert alert-danger alert-dismissible fade show">
+            <%= error %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <% } %>
+
+    <!-- Formulario de disponibilidad -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title">Configurar disponibilidad</h5>
+            <form action="/user/admin/canchas/<%= cancha?.id %>/horarios" method="POST">
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Días habilitados</label>
+                    <div class="d-flex flex-wrap gap-3">
+                        <% const todosLosDias = [
+                            {val:'lunes',    label:'Lunes'},
+                            {val:'martes',   label:'Martes'},
+                            {val:'miercoles',label:'Miércoles'},
+                            {val:'jueves',   label:'Jueves'},
+                            {val:'viernes',  label:'Viernes'},
+                            {val:'sabado',   label:'Sábado'},
+                            {val:'domingo',  label:'Domingo'}
+                        ]; %>
+                        <% todosLosDias.forEach(dia => { %>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox"
+                                    name="dias_semana"
+                                    value="<%= dia.val %>"
+                                    id="dia-<%= dia.val %>"
+                                    <%= horario && horario.dias_semana && horario.dias_semana.includes(dia.val) ? 'checked' : '' %>>
+                                <label class="form-check-label" for="dia-<%= dia.val %>">
+                                    <%= dia.label %>
+                                </label>
+                            </div>
+                        <% }) %>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Hora de apertura</label>
+                        <input type="time" name="hora_apertura" class="form-control"
+                            value="<%= horario ? horario.hora_apertura.slice(0,5) : '07:00' %>" required>
+                        <div class="form-text">Desde qué hora pueden reservar</div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Hora de cierre</label>
+                        <input type="time" name="hora_cierre" class="form-control"
+                            value="<%= horario ? horario.hora_cierre.slice(0,5) : '23:00' %>" required>
+                        <div class="form-text">Hasta qué hora pueden reservar</div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Guardar disponibilidad</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Estado actual -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title">Estado actual</h5>
+            <% if (!horario) { %>
+                <div class="alert alert-warning mb-0">
+                    ⚠️ Esta cancha no tiene disponibilidad configurada. Los clientes no podrán reservarla.
+                </div>
+            <% } else { %>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Días habilitados:</strong></p>
+                        <div class="d-flex flex-wrap gap-1 mb-3">
+                            <% const nombresMap = {lunes:'Lunes', martes:'Martes', miercoles:'Miércoles', jueves:'Jueves', viernes:'Viernes', sabado:'Sábado', domingo:'Domingo'}; %>
+                            <% horario.dias_semana.forEach(d => { %>
+                                <span class="badge bg-success fs-6"><%= nombresMap[d] || d %></span>
+                            <% }) %>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Horario habilitado:</strong></p>
+                        <p class="fs-5">
+                            🕐 <%= horario.hora_apertura.slice(0,5) %> — <%= horario.hora_cierre.slice(0,5) %>
+                        </p>
+                    </div>
+                </div>
+                <p class="text-muted small mb-0">
+                    Los clientes podrán elegir cualquier franja horaria dentro de ese rango,
+                    con un mínimo de 1 hora por reserva.
+                </p>
+            <% } %>
+        </div>
+    </div>
+
+</div>
+
+<%- include('../../components/home/footer.ejs') %>

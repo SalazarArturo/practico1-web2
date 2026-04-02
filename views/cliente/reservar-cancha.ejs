@@ -1,0 +1,338 @@
+<%- include('../components/home/header.ejs') %>
+
+<div class="container mt-4">
+
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/cliente/canchas">Canchas</a></li>
+            <li class="breadcrumb-item active"><%= cancha.nombre %></li>
+        </ol>
+    </nav>
+
+    <% if (locals.success) { %>
+        <div class="alert alert-success alert-dismissible fade show">
+            <%= success %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <% } %>
+    <% if (locals.error) { %>
+        <div class="alert alert-danger alert-dismissible fade show">
+            <%= error %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <% } %>
+
+    <div class="row">
+        <!-- Info de la cancha -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="card-title"><%= cancha.nombre %></h4>
+                    <p class="mb-1">
+                        <span class="badge bg-secondary"><%= cancha.tipoCancha?.nombre || 'Sin tipo' %></span>
+                    </p>
+                    <p class="mt-2 mb-1"><strong>Precio por hora:</strong> $<%= cancha.precio_por_hora %></p>
+                    <p class="mb-0">
+                        <strong>Estado:</strong>
+                        <span class="badge <%= cancha.estado === 'activa' ? 'bg-success' : 'bg-danger' %>">
+                            <%= cancha.estado %>
+                        </span>
+                    </p>
+
+                    <% if (disponibilidad) { %>
+                        <hr>
+                        <p class="mb-1"><strong>Días disponibles:</strong></p>
+                        <div class="d-flex flex-wrap gap-1 mb-2">
+                            <% const diasNombres = { lunes:'Lun', martes:'Mar', miercoles:'Mié', jueves:'Jue', viernes:'Vie', sabado:'Sáb', domingo:'Dom' }; %>
+                            <% disponibilidad.dias_semana.forEach(d => { %>
+                                <span class="badge bg-primary"><%= diasNombres[d] || d %></span>
+                            <% }) %>
+                        </div>
+                        <p class="mb-0"><strong>Horario:</strong>
+                            <%= disponibilidad.hora_apertura.slice(0,5) %> – <%= disponibilidad.hora_cierre.slice(0,5) %>
+                        </p>
+                    <% } else { %>
+                        <hr>
+                        <p class="text-muted small">Esta cancha no tiene disponibilidad configurada aún.</p>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Formulario de reseña -->
+            <div class="card shadow-sm mt-3">
+                <div class="card-body">
+                    <h5 class="card-title">Dejar una reseña</h5>
+                    <p class="text-muted small">Solo disponible si tuviste una reserva completada.</p>
+                    <form action="/cliente/resenas" method="POST">
+                        <input type="hidden" name="cancha_id" value="<%= cancha.id %>">
+                        <div class="mb-3">
+                            <label class="form-label">Calificación</label>
+                            <select name="calificacion" class="form-select" required>
+                                <option value="">Seleccioná...</option>
+                                <option value="5">⭐⭐⭐⭐⭐ Excelente</option>
+                                <option value="4">⭐⭐⭐⭐ Muy bueno</option>
+                                <option value="3">⭐⭐⭐ Bueno</option>
+                                <option value="2">⭐⭐ Regular</option>
+                                <option value="1">⭐ Malo</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Comentario (opcional)</label>
+                            <textarea name="comentario" class="form-control" rows="3" placeholder="Contá tu experiencia..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-outline-primary w-100">Enviar reseña</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de reserva -->
+        <div class="col-md-8">
+            <% if (!disponibilidad) { %>
+                <div class="alert alert-info">Esta cancha no tiene horarios configurados todavía.</div>
+            <% } else { %>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">📅 Hacer una reserva</h5>
+
+                    <!-- Paso 1: elegir fecha -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">1. Elegí el día</label>
+                        <input type="date" id="fechaInput" class="form-control"
+                            min="<%= new Date().toISOString().split('T')[0] %>"
+                            placeholder="Seleccioná una fecha">
+                        <div id="diaError" class="text-danger small mt-1 d-none"></div>
+                    </div>
+
+                    <!-- Paso 2: visualización de horarios del día -->
+                    <div id="seccionHoras" class="d-none">
+                        <label class="form-label fw-bold">2. Elegí el horario</label>
+                        <p class="text-muted small mb-2">
+                            Hacé clic en la hora de inicio y luego en la hora de fin. Mínimo 1 hora.
+                            Los bloques <span class="badge bg-danger">rojos</span> ya están reservados.
+                        </p>
+
+                        <div id="grilla-horas" class="d-flex flex-wrap gap-1 mb-3">
+                            <!-- generado por JS -->
+                        </div>
+
+                        <div id="resumenSeleccion" class="alert alert-info d-none">
+                            Seleccionado: <strong id="textoHorario"></strong>
+                            — <strong id="textoPrecio"></strong>
+                        </div>
+                    </div>
+
+                    <!-- Formulario oculto para enviar -->
+                    <form id="formReserva" action="/cliente/reservas" method="POST" class="d-none">
+                        <input type="hidden" name="cancha_id" value="<%= cancha.id %>">
+                        <input type="hidden" name="fecha" id="campoFecha">
+                        <input type="hidden" name="hora_inicio" id="campoHoraInicio">
+                        <input type="hidden" name="hora_fin" id="campoHoraFin">
+                        <button type="submit" class="btn btn-success w-100 mt-2">
+                            ✅ Confirmar reserva
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <% } %>
+
+            <!-- Reseñas -->
+            <h4 class="mt-2 mb-3">Reseñas de esta cancha</h4>
+            <% if (!resenas || resenas.length === 0) { %>
+                <p class="text-muted">Todavía no hay reseñas para esta cancha.</p>
+            <% } else { %>
+                <% resenas.forEach(resena => { %>
+                    <div class="card mb-2 shadow-sm">
+                        <div class="card-body py-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <strong><%= resena.usuario?.nombre || 'Usuario' %></strong>
+                                <span>
+                                    <% for(let i = 0; i < resena.calificacion; i++) { %>⭐<% } %>
+                                </span>
+                            </div>
+                            <% if (resena.comentario) { %>
+                                <p class="mb-0 text-muted small mt-1"><%= resena.comentario %></p>
+                            <% } %>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<% if (disponibilidad) { %>
+<script>
+const CANCHA_ID = <%= cancha.id %>;
+const HORA_APERTURA = '<%= disponibilidad.hora_apertura.slice(0,5) %>';
+const HORA_CIERRE   = '<%= disponibilidad.hora_cierre.slice(0,5) %>';
+const DIAS_HABILITADOS = <%- JSON.stringify(disponibilidad.dias_semana) %>;
+const PRECIO_POR_HORA = <%= cancha.precio_por_hora %>;
+
+const DIAS_JS_MAP = { 0:'domingo', 1:'lunes', 2:'martes', 3:'miercoles', 4:'jueves', 5:'viernes', 6:'sabado' };
+
+let horasReservadas = []; // [{inicio: 480, fin: 600}, ...] en minutos
+let selInicio = null;
+let selFin = null;
+
+function horaStr(min) {
+    const h = String(Math.floor(min / 60)).padStart(2, '0');
+    const m = String(min % 60).padStart(2, '0');
+    return h + ':' + m;
+}
+
+function minutos(horaStr) {
+    const [h, m] = horaStr.split(':').map(Number);
+    return h * 60 + m;
+}
+
+function estaReservado(bloque) {
+    // bloque = minutos de inicio de ese slot de 30min
+    for (const r of horasReservadas) {
+        if (bloque >= r.inicio && bloque < r.fin) return true;
+    }
+    return false;
+}
+
+function renderGrilla() {
+    const grilla = document.getElementById('grilla-horas');
+    grilla.innerHTML = '';
+    const inicio = minutos(HORA_APERTURA);
+    const fin = minutos(HORA_CIERRE);
+
+    for (let t = inicio; t < fin; t += 60) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.dataset.min = t;
+        btn.textContent = horaStr(t);
+        btn.className = 'btn btn-sm ';
+
+        const reservado = estaReservado(t);
+
+        if (reservado) {
+            btn.className += 'btn-danger disabled';
+            btn.title = 'Ya reservado';
+        } else if (selInicio !== null && selFin !== null && t >= selInicio && t < selFin) {
+            btn.className += 'btn-success';
+        } else if (selInicio !== null && t === selInicio) {
+            btn.className += 'btn-success';
+        } else {
+            btn.className += 'btn-outline-secondary';
+        }
+
+        if (!reservado) {
+            btn.addEventListener('click', () => onClickHora(t));
+        }
+        grilla.appendChild(btn);
+    }
+    actualizarResumen();
+}
+
+function onClickHora(t) {
+    if (selInicio === null) {
+        // primer clic = hora inicio
+        selInicio = t;
+        selFin = null;
+    } else if (t <= selInicio) {
+        // clic antes o igual al inicio → reiniciar
+        selInicio = t;
+        selFin = null;
+    } else {
+        // segundo clic = hora fin
+        // verificar que no haya reservas en el medio
+        let hayConflicto = false;
+        for (let x = selInicio; x < t; x += 60) {
+            if (estaReservado(x)) { hayConflicto = true; break; }
+        }
+        if (hayConflicto) {
+            alert('Hay una reserva existente en ese rango. Elegí otro horario.');
+            selInicio = null;
+            selFin = null;
+        } else {
+            selFin = t + 60; // fin = hora seleccionada + 1h
+            // Si el usuario quiere un rango más largo, detectamos
+            // que ya seleccionó inicio y está ampliando
+        }
+    }
+    renderGrilla();
+}
+
+function actualizarResumen() {
+    const resumen = document.getElementById('resumenSeleccion');
+    const form = document.getElementById('formReserva');
+
+    if (selInicio !== null && selFin !== null) {
+        const horas = (selFin - selInicio) / 60;
+        const precio = horas * PRECIO_POR_HORA;
+        document.getElementById('textoHorario').textContent =
+            horaStr(selInicio) + ' a ' + horaStr(selFin);
+        document.getElementById('textoPrecio').textContent =
+            horas + ' hora' + (horas > 1 ? 's' : '') + ' — $' + precio.toLocaleString('es-AR');
+        resumen.classList.remove('d-none');
+        form.classList.remove('d-none');
+        document.getElementById('campoHoraInicio').value = horaStr(selInicio) + ':00';
+        document.getElementById('campoHoraFin').value = horaStr(selFin) + ':00';
+    } else {
+        resumen.classList.add('d-none');
+        form.classList.add('d-none');
+        if (selInicio !== null) {
+            document.getElementById('resumenSeleccion').classList.remove('d-none');
+            resumen.classList.remove('d-none');
+            document.getElementById('textoHorario').textContent = 'Desde ' + horaStr(selInicio) + ' — ahora seleccioná la hora de fin';
+            document.getElementById('textoPrecio').textContent = '';
+            form.classList.add('d-none');
+        }
+    }
+}
+
+// Cuando cambia la fecha
+document.getElementById('fechaInput').addEventListener('change', async function() {
+    const fecha = this.value;
+    const diaError = document.getElementById('diaError');
+    const seccion = document.getElementById('seccionHoras');
+
+    if (!fecha) return;
+
+    // Verificar día de semana
+    const d = new Date(fecha + 'T12:00:00');
+    const diaNombre = DIAS_JS_MAP[d.getDay()];
+
+    if (!DIAS_HABILITADOS.includes(diaNombre)) {
+        const diasMostrar = DIAS_HABILITADOS.join(', ');
+        diaError.textContent = `Esta cancha no está disponible los ${diaNombre}s. Días habilitados: ${diasMostrar}.`;
+        diaError.classList.remove('d-none');
+        seccion.classList.add('d-none');
+        return;
+    }
+
+    diaError.classList.add('d-none');
+    document.getElementById('campoFecha').value = fecha;
+
+    // Consultar reservas del día
+    try {
+        const resp = await fetch(`/cliente/canchas/${CANCHA_ID}/reservas-dia?fecha=${fecha}`);
+        const data = await resp.json();
+        horasReservadas = (data.reservas || []).map(r => ({
+            inicio: minutos(r.hora_inicio),
+            fin: minutos(r.hora_fin)
+        }));
+    } catch(e) {
+        horasReservadas = [];
+    }
+
+    selInicio = null;
+    selFin = null;
+    seccion.classList.remove('d-none');
+    renderGrilla();
+});
+
+// Soporte para selección extendida: segundo clic expande la selección
+document.getElementById('grilla-horas').addEventListener('click', function(e) {
+    // ya manejado por renderGrilla
+});
+</script>
+<% } %>
+
+<%- include('../components/home/footer.ejs') %>

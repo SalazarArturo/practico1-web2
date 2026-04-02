@@ -1,51 +1,56 @@
 <%- include('../components/home/header.ejs') %>
-    <% if(locals.logoutError){ %>
-        <div class="alert alert-danger m-3">
-            <%= locals.logoutError %>
-        </div>
+
+<div class="container mt-5">
+
+    <% if (locals.logError) { %>
+        <div class="alert alert-danger"><%= logError %></div>
     <% } %>
-    <% if(userData.rol === 'admin'){ %>
 
-        <div class="row mt-4">
+    <% if (locals.userData && locals.userData.rol === 'admin') { %>
 
+        <h2 class="mb-4">Panel de administración</h2>
+
+        <div class="row g-3">
             <div class="col-md-4">
-                <a href="/user/admin/canchas" class="btn btn-primary w-100 mb-3">
-                    Gestion de canchas
+                <a href="/user/admin/canchas" class="btn btn-primary w-100 py-3">
+                    🏟️ Gestión de Canchas
                 </a>
             </div>
-
             <div class="col-md-4">
-                <a href="/user/admin/modelos" class="btn btn-secondary w-100 mb-3">
-                    Modelos de cancha
+                <a href="/user/admin/modelos" class="btn btn-secondary w-100 py-3">
+                    📋 Tipos de Cancha
                 </a>
             </div>
-
             <div class="col-md-4">
-                <a href="/user/admin/horarios" class="btn btn-success w-100 mb-3">
-                    Horarios
+                <a href="/user/admin/reservas" class="btn btn-warning w-100 py-3">
+                    📅 Ver Reservas
                 </a>
             </div>
-
             <div class="col-md-4">
-                <a href="/user/admin/reservas" class="btn btn-warning w-100 mb-3">
-                    Ver Reservas
+                <a href="/user/admin/resenas" class="btn btn-info w-100 py-3">
+                    ⭐ Ver Reseñas
                 </a>
             </div>
-
-            <div class="col-md-4">
-                <a href="/user/admin/resenas" class="btn btn-info w-100 mb-3">
-                    Ver Reseñas
-                </a>
-            </div>
-
         </div>
-        
+
     <% } else { %>
 
-        <div class="alert alert-warning mt-3">
-            No tienes permisos de administrador
+        <h2 class="mb-4">Bienvenido, <%= locals.userData?.nombre %>!</h2>
+
+        <div class="row g-3">
+            <div class="col-md-4">
+                <a href="/cliente/canchas" class="btn btn-primary w-100 py-3">
+                    🏟️ Ver Canchas
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="/cliente/reservas" class="btn btn-success w-100 py-3">
+                    📅 Mis Reservas
+                </a>
+            </div>
         </div>
 
     <% } %>
+</div>
 
 <%- include('../components/home/footer.ejs') %>

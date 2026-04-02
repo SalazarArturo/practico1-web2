@@ -1,0 +1,25 @@
+<%- include('../components/home/header.ejs') %>
+
+<div class="container mt-5">
+
+    <% if (locals.logError) { %>
+        <div class="alert alert-danger"><%= logError %></div>
+    <% } %>
+
+    <h2 class="mb-4">Bienvenido, <%= locals.userData?.nombre %>!</h2>
+
+    <div class="row g-3">
+        <div class="col-md-4">
+            <a href="/cliente/canchas" class="btn btn-primary w-100 py-3">
+                🏟️ Ver Canchas disponibles
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="/cliente/reservas" class="btn btn-success w-100 py-3">
+                📅 Mis Reservas
+            </a>
+        </div>
+    </div>
+</div>
+
+<%- include('../components/home/footer.ejs') %>
