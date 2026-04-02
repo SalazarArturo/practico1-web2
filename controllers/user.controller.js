@@ -37,7 +37,7 @@ async function getCanchas(req, res){
     }
 }
 function serveNewCanchaForm(req, res){
-    return res.render('logedUserViews/adminViews/canchas-form')
+    return res.render('logedUserViews/adminViews/canchas-form');
 }
 export{
     serveHome,

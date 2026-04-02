@@ -1,6 +1,7 @@
+
 import { getAllCanchasService } from "../services/user.service.js";
 
-function serveHome(req, res){
+function serveHomeCliente(req, res){
 
     let logError = req.query.error;
 
@@ -16,7 +17,7 @@ function serveHome(req, res){
 }
 
 //controllers de admin
-async function getCanchas(req, res){
+async function getCanchasCliente(req, res){
     try {
         const result = await getAllCanchasService();
         if(!result.success){
@@ -36,7 +37,7 @@ async function getCanchas(req, res){
         });
     }
 }
-async function getCanchas(req, res){
+async function getCanchas2Clientes(req, res){
     try {
         const result = await getAllCanchasService();
         if(!result.success){
@@ -80,6 +81,8 @@ async function getReservas(req, res){
 }
 
 export{
-    serveHome,
-    getCanchas
+    serveHomeCliente,
+    getCanchasCliente,
+    getCanchas2Clientes,
+    getReservas
 }

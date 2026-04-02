@@ -16,7 +16,7 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: false}));
 
 app.use(session({
-    secret: process.env.SECRET_SESSION_WORD,
+    secret: process.env.SESSION_SECRET_WORD,
     resave: false,
     saveUninitialized: false,
     cookie: {
