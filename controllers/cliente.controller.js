@@ -1,88 +1,31 @@
 
-import { getAllCanchasService } from "../services/user.service.js";
+import { getAllCanchasService } from "../services/cliente.service.js";
 
-function serveHomeCliente(req, res){
+function serveHomeCliente(req, res) {
+    const logError = req.query.error === 'logout'
+        ? 'No se pudo cerrar la sesión'
+        : req.query.error === 'unauthorized'
+        ? 'Acceso denegado'
+        : null;
 
-    let logError = req.query.error;
-
-    if(logError == 'logout'){
-        logError = 'No se pudo cerrar la sesion, intente nuevamente';
-    }
-    if(logError == 'unauthorized'){
-        logError = 'Acceso denegado'
-    }
-   /*const logError = req.query.error === 'logout' ? 'No se pudo cerrar la sesion, intente nuevamente'
-   : null;*/
-    return res.render('logedUserViews/home', {logError});
+    return res.render('cliente/home', { logError });
 }
 
-//controllers de admin
-async function getCanchasCliente(req, res){
+
+async function getCanchasCliente(req, res) {
     try {
         const result = await getAllCanchasService();
-        if(!result.success){
-            return res.render('cliente/list-canchas', {
-                canchas: [],
-                error: result.error
-            });
+        if (!result.success) {
+            return res.render('cliente/list-canchas', { canchas: [], error: result.error });
         }
-        return res.render('cliente/list-canchas', {
-            canchas: result.canchas,
-            error: null
-        });
+        return res.render('cliente/list-canchas', { canchas: result.canchas, error: null });
     } catch (error) {
-        return res.render('cliente/list-canchas', { 
-            canchas: [],
-            error: 'Error al cargar las canchas'
-        });
-    }
-}
-async function getCanchas2Clientes(req, res){
-    try {
-        const result = await getAllCanchasService();
-        if(!result.success){
-            return res.render('cliente/list-canchas', {
-                canchas: [],
-                error: result.error
-            });
-        }
-        return res.render('cliente/list-canchas', {
-            canchas: result.canchas,
-            error: null
-        });
-    } catch (error) {
-        return res.render('cliente/list-canchas', { 
-            canchas: [],
-            error: 'Error al cargar las canchas'
-        });
+        return res.render('cliente/list-canchas', { canchas: [], error: 'Error al cargar las canchas' });
     }
 }
 
-
-async function getReservas(req, res){
-    try {
-        const result = await getAllCanchasService();
-        if(!result.success){
-            return res.render('cliente/list-canchas', {
-                canchas: [],
-                error: result.error
-            });
-        }
-        return res.render('cliente/list-canchas', {
-            canchas: result.canchas,
-            error: null
-        });
-    } catch (error) {
-        return res.render('cliente/list-canchas', { 
-            canchas: [],
-            error: 'Error al cargar las canchas'
-        });
-    }
-}
 
 export{
     serveHomeCliente,
     getCanchasCliente,
-    getCanchas2Clientes,
-    getReservas
 }

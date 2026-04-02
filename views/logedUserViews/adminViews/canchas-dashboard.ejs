@@ -5,22 +5,22 @@
 
     <h2>Gestion de Canchas</h2>
 
-    <!-- 🔴 Caso 1: Error -->
+    <!-- si hay error -->
     <% if(error){ %>
         <p class="text-danger mt-2"><%= error %></p>
     <% } %>
 
-    <!-- 🟡 Caso 2: No hay canchas -->
+    <!-- no hay canchas -->
     <% if(!error && canchas.length === 0){ %>
         <p class="text-muted mt-2">No hay canchas registradas todavia</p>
     <% } %>
 
-    <!-- 🟢 Botón crear (siempre visible) -->
+    <!-- esto esta sin importar el caso -->
     <a href="/user/admin/canchas/new" class="btn btn-primary mb-3">
         Crear nueva cancha
     </a>
 
-    <!-- 🟢 Caso 3: Hay canchas -->
+    <!-- hay canchas-->
     <% if(!error && canchas.length > 0){ %>
 
         <table class="table table-striped">
@@ -46,12 +46,12 @@
                             <% } %>
                         </td>
                         <td>
-                            <a href="/admin/canchas/<%= cancha.id %>/edit" 
+                            <a href="/user/admin/canchas/<%= cancha.id %>/edit" 
                                class="btn btn-warning btn-sm">
                                 Editar
                             </a>
-                            <form action="/admin/canchas/<%= cancha.id %>/delete" 
-                                  method="POST" 
+                            <form action="/user/admin/canchas/<%= cancha.id %>/delete" 
+                                  method="post" 
                                   style="display:inline;">
                                 <button class="btn btn-danger btn-sm">
                                     Eliminar

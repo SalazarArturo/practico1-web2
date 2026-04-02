@@ -1,3 +1,56 @@
 <%- include('../../components/home/header.ejs') %>
-    <p>aqui debe ir el formulario de canchas</p>
+
+<div class="container mt-4">
+
+    <h2><%= locals.isEdit ? 'Editar cancha' : 'Nueva cancha' %></h2>
+
+    <% if(locals.error){ %>
+        <p class="text-danger"><%= error %></p>
+    <% } %>
+
+    <form action="<%= locals.isEdit ? `/user/admin/canchas/${locals.cancha.id}` : "/user/admin/canchas" %>" method="POST">
+        
+        <div class="mb-3">
+            <label class="form-label">Nombre</label>
+            <input type="text" name="nombre" class="form-control" value="<%= locals.cancha ? `${locals.cancha.nombre}` : '' %>">
+        </div>
+
+        
+        <div class="mb-3">
+            <label class="form-label">Precio por hora</label>
+            <input type="number" step="0.01" name="precio_por_hora" class="form-control" value="<%= locals.cancha ? `${locals.cancha.precio_por_hora}` : '' %>">
+        </div>
+
+        
+        <div class="mb-3">
+    <label class="form-label">Estado</label>
+    <select name="estado" class="form-control">
+        <option value="activa"
+            <%= locals.isEdit && locals.cancha.estado === 'activa' ? 'selected' : '' %>>
+            Activa
+        </option>
+
+        <option value="inactiva"
+            <%= locals.isEdit && locals.cancha.estado === 'inactiva' ? 'selected' : '' %>>
+            Inactiva
+        </option>
+    </select>
+</div>
+        
+        <div class="mb-3">
+            <label class="form-label">Tipo de cancha</label>
+           <select name="tipo_cancha_id" class="form-control">
+                <% tipos.forEach(tipo => { %>
+                    <option value="<%= tipo.id %>"
+                    <%= locals.isEdit && locals.cancha.tipo_cancha_id === tipo.id ? 'selected' : '' %>>
+                <%= tipo.nombre %>
+                    </option>
+            <% }) %>
+            </select>
+        </div>
+
+        <button class="btn btn-success">Guardar</button>
+        <a href="/user/admin/canchas" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
 <%- include('../../components/home/footer.ejs') %>

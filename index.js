@@ -5,6 +5,8 @@ import bodyParser from 'body-parser';
 
 import { sequelize } from './models/index.js';
 
+
+import clientRouter from './routes/client.route.js';
 import authRouter from './routes/auth.route.js';
 import userRoute from './routes/user.route.js';
 
