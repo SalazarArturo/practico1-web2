@@ -4,8 +4,23 @@ function isAuthenticated(req, res, next){
         console.log('lo siento choquito, no pasaste');
         return res.redirect('/');
     }
-    res.locals.userData = req.session.user; //hacemos esto para que en el ejs tengamos directamente los datos de la sesion del usuario sin tener que especificarlas en los controller cuando queramos renderizar algo
+    res.locals.userData = req.session.user;
+    res.locals.userRol = req.session.user.rol;
+    res.locals.userId = req.session.user.id;
+
     next();
 }
 
-export {isAuthenticated}
+// Verifica si es admin
+function isAdmin(req, res, next) {
+    if (!req.session.user) {
+        return res.redirect("/");
+    }
+    if (req.session.user.rol !== 'admin') {
+        return res.redirect('/user/home?error=unauthorized');
+    }
+    next();
+}
+
+
+export {isAuthenticated, isAdmin}

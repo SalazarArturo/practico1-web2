@@ -1,0 +1,48 @@
+<%- include('../components/home/header.ejs') %>
+
+    <div class="container">
+        <div class="row mt-2 mb-2">
+            <div class="col-8 offset-2">
+                <div class="card">
+                    <div class="card-body">
+                         <div class="card-title">
+                            <h1>Mis Reservas</h1>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Cancha</th>
+                                        <th>Tipo</th>
+                                        <th>Fecha</th>
+                                        <th>Hora inicio</th>
+                                        <th>Hora fin</th>
+                                        <th>Estado</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% if (reservas.length === 0) { %>
+                                        <tr>
+                                            <td colspan="8" class="text-center">No tenés reservas aún</td>
+                                        </tr>
+                                    <% } %>
+                                    <% reservas.forEach(reserva => { %>
+                                        <tr>
+                                            <td><%= reserva.Horario.Cancha.nombre %></td>
+                                            <td><%= reserva.Horario.Cancha.TipoCancha.nombre %></td>
+                                            <td><%= reserva.Horario.fecha %></td>
+                                            <td><%= reserva.Horario.hora_inicio %></td>
+                                            <td><%= reserva.Horario.hora_fin %></td>
+                                           
+                                        </tr>
+                                    <% }) %>
+                                </tbody>
+                            </table>
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <%- include('../components/footer.ejs') %>

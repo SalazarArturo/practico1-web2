@@ -4,4 +4,48 @@
             <%= locals.logoutError %>
         </div>
     <% } %>
+    <% if(userData.rol === 'admin'){ %>
+
+        <div class="row mt-4">
+
+            <div class="col-md-4">
+                <a href="/user/admin/canchas" class="btn btn-primary w-100 mb-3">
+                    Gestionar Canchas
+                </a>
+            </div>
+
+            <div class="col-md-4">
+                <a href="user/admin/tipos" class="btn btn-secondary w-100 mb-3">
+                    Tipos de Cancha
+                </a>
+            </div>
+
+            <div class="col-md-4">
+                <a href="user/admin/horarios" class="btn btn-success w-100 mb-3">
+                    Horarios
+                </a>
+            </div>
+
+            <div class="col-md-4">
+                <a href="user/admin/reservas" class="btn btn-warning w-100 mb-3">
+                    Ver Reservas
+                </a>
+            </div>
+
+            <div class="col-md-4">
+                <a href="user/admin/resenas" class="btn btn-info w-100 mb-3">
+                    Ver Reseñas
+                </a>
+            </div>
+
+        </div>
+        
+    <% } else { %>
+
+        <div class="alert alert-warning mt-3">
+            No tienes permisos de administrador
+        </div>
+
+    <% } %>
+
 <%- include('../components/home/footer.ejs') %>
